@@ -1,6 +1,6 @@
 # Adding settings to your mod with ConfigurationManager
 
-[Русская версия](AUTHORING.ru.md)
+[Русская версия](README.ru.md)
 
 ConfigurationManager gives Abiotic Factor mods an in-game settings panel. You describe your settings in a String
 Table, read them with a small function library you copy into your mod, and optionally let the manager apply them
