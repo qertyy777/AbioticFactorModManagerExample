@@ -12,8 +12,7 @@ and hooks are not called. So a mod keeps working without the manager only if it 
 places or uses) that read the values; a mod whose code runs only in hooks does nothing.
 
 A complete working example is the `CMExampleModAbr9y` mod in this repository (`Examples/CMExampleModAbr9y`). It has
-one real setting, `Speed`, which changes the speed of the facility trams. On mod.io the example lists the manager
-as a dependency, so the manager is installed together with it; for your mod this is up to you.
+one real setting, `Speed`, which changes the speed of the facility trams.
 
 ![ModSettings folder of the example mod](images/01-modsettings-folder.png)
 
