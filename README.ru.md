@@ -1,6 +1,6 @@
 # Настройки своего мода через ConfigurationManager
 
-[English version](AUTHORING.md)
+[English version](README.md)
 
 ConfigurationManager даёт модам Abiotic Factor панель настроек в игре. Вы описываете настройки в String Table,
 читаете их небольшой библиотекой функций, которую копируете в свой мод, и при желании поручаете менеджеру
