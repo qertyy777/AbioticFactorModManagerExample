@@ -1,0 +1,30 @@
+Key,SourceString
+Mod.FormatVersion,1
+Mod.DisplayName,CM Example
+Speed.Type,Float
+Speed.Default,1.0
+Speed.Min,0.5
+Speed.Max,3.0
+Speed.Step,0.1
+Speed.Label,Tram speed
+Speed.Description,"Speed multiplier for trams in this world. 1.0 is the normal game speed."
+Speed.Order,10
+Speed.ApplyOn,Live
+TBool.Type,Bool
+TBool.Default,true
+TBool.Label,Test bool
+TInt.Type,Int
+TInt.Default,2
+TInt.Min,0
+TInt.Max,5
+TInt.Label,Test int
+TFloat.Type,Float
+TFloat.Default,1.0
+TFloat.Min,0.5
+TFloat.Max,3.0
+TFloat.Step,0.5
+TFloat.Label,Test float
+TChoice.Type,Choice
+TChoice.Default,1
+TChoice.Choices,Low;Medium;High
+TChoice.Label,Test choice
