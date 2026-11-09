@@ -7,7 +7,7 @@ Table, read them with a small function library you copy into your mod, and optio
 to the world for you.
 
 ConfigurationManager is an **optional** dependency: your mod does not reference any manager asset. Without the
-manager (or while no settings terminal is placed in the world) the reader returns the default values you pass to it,
+manager (or while no settings terminal is placed in the world) the reader returns the `Default` values from your table,
 and hooks are not called. So a mod keeps working without the manager only if it has its own actors (things the player
 places or uses) that read the values; a mod whose code runs only in hooks does nothing.
 
@@ -82,22 +82,23 @@ Blueprint Function Library that uses only engine nodes, so it does not create a 
 
 ## Step 3. Read values
 
-Call the `CM_Reader` functions where you need a value. Arguments: your mod id, the `<Key>` from the table, and the
-default value.
+Call the `CM_Reader` functions where you need a value. Arguments: your mod id and the `<Key>` from the table. While
+the manager has published no value (no manager, no terminal in the world), a function returns `<Key>.Default` from
+your `/<mod id>/ModSettings/ST_ModSettings`; if the key is not in the table, it returns `0` / `false`.
 
 | Function | Returns |
 |---|---|
-| `CM_GetFloat(Mod, Key, Default)` | Float |
-| `CM_GetInt(Mod, Key, Default)` | Int |
-| `CM_GetBool(Mod, Key, Default)` | Bool |
-| `CM_GetChoice(Mod, Key, Default)` | option index (Int) |
+| `CM_GetFloat(Mod, Key)` | Float |
+| `CM_GetInt(Mod, Key)` | Int |
+| `CM_GetBool(Mod, Key)` | Bool |
+| `CM_GetChoice(Mod, Key)` | option index (Int) |
 | `CM_GetRevision()` | settings revision number; `-1` means no manager or no terminal |
 
 **Mod id** is the name of your plugin folder as the Mod Kit created it, including the generated suffix — for the
 example it is `CMExampleModAbr9y`, not `CMExampleMod`. It is also the root of your content paths
 (`/CMExampleModAbr9y/...`).
 
-Example: `CM_GetFloat("MyModAbc12", "Speed", 1.0)`.
+Example: `CM_GetFloat("MyModAbc12", "Speed")`.
 
 ![CM_GetFloat call](images/03-reader-call.png)
 
@@ -123,11 +124,9 @@ manager runs your code for you through a hook — a component it creates itself.
 3. In **Event Begin Play** read your values with `CM_Reader` and apply them. Write absolute values
    (`base × multiplier`), never multiply the current value: `BeginPlay` runs many times.
 
-The example has two hooks. `Hooks/CM_HookTrams` finds all trams and sets their speed (`SetTramSpeed` is a function
+The example has one hook, `Hooks/CM_HookTrams`. It finds all trams and sets their speed (`SetTramSpeed` is a function
 inside the hook that loops over `GetAllActorsOfClass(Tram_ParentBP)` and sets `TramSpeed = 500 × Mult`,
-`TramSpeedUnattended = 1500 × Mult`); `Hooks/CM_HookLog` only writes the `TBool` setting to the chat:
-
-![CM_HookTrams Event Graph](images/04-hook-beginplay.png)
+`TramSpeedUnattended = 1500 × Mult`).
 
 `BeginPlay` of every hook runs:
 - when a world with a settings terminal is loaded;
