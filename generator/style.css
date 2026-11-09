@@ -1,0 +1,161 @@
+/* Colours follow the mod.io logo: dark teal background, green accent. */
+:root {
+  --bg: #f4f7f7;
+  --panel: #ffffff;
+  --text: #15282c;
+  --muted: #5d7276;
+  --line: #d5e0e1;
+  --accent: #128c6e;
+  --accent-text: #ffffff;
+  --danger: #c0392b;
+  --warn-bg: #fff4dc;
+  --warn-text: #7a5300;
+  --input: #ffffff;
+  --code-bg: #eaf0f1;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b1a1e;
+    --panel: #12292f;
+    --text: #e3eced;
+    --muted: #8fa5a8;
+    --line: #23424a;
+    --accent: #19a383;
+    --accent-text: #04140f;
+    --danger: #ff7a6b;
+    --warn-bg: #3a2f12;
+    --warn-text: #f3d48a;
+    --input: #0d2125;
+    --code-bg: #0d2125;
+  }
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+a { color: var(--accent); }
+code, pre { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+h1 { margin: 0; font-size: 20px; }
+.sub { margin: 4px 0 0; color: var(--muted); }
+.actions, .row-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.btn {
+  display: inline-block;
+  padding: 7px 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 600; }
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+  gap: 24px;
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); padding: 16px; }
+  .top { padding: 16px; }
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.card.bad { border-color: var(--danger); }
+.card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.num { color: var(--muted); font-weight: 600; }
+.tools { display: flex; gap: 4px; }
+.icon {
+  width: 28px; height: 28px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+.icon:hover { border-color: var(--accent); }
+.icon.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px 14px; }
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field > span { font-weight: 600; font-size: 13px; }
+.field em { font-style: normal; font-weight: 400; color: var(--muted); }
+.f-description, .f-choices, .field.wide { grid-column: 1 / -1; }
+input, select {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--input);
+  color: var(--text);
+  font: inherit;
+}
+input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.err { color: var(--danger); min-height: 0; }
+.err:empty { display: none; }
+
+.notice {
+  background: var(--warn-bg);
+  color: var(--warn-text);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+}
+
+.preview { position: sticky; top: 16px; align-self: start; }
+.preview-head { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 6px; font-weight: 600; }
+.status { font-weight: 400; font-size: 13px; }
+.status.ok { color: var(--accent); }
+.status.warn { color: var(--danger); }
+pre {
+  margin: 0;
+  padding: 12px;
+  background: var(--code-bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  max-height: calc(100vh - 140px);
+  overflow: auto;
+  font-size: 12.5px;
+  white-space: pre;
+}
+@media (max-width: 900px) { .preview { position: static; } pre { max-height: 50vh; } }
+
+.drop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(18, 140, 110, 0.85);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 600;
+  pointer-events: none;
+}
+.drop[hidden] { display: none; }

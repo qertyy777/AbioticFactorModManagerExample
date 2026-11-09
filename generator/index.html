@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ModSettings Generator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div>
+      <h1>ModSettings generator</h1>
+      <p class="sub">For <code>ModSettings/ST_ModSettings</code> ·
+        <a href="https://github.com/qertyy777/AbioticFactorModManagerExample/blob/main/README.md">Guide</a></p>
+    </div>
+    <div class="actions">
+      <label class="btn">Open CSV<input type="file" id="file" accept=".csv,text/csv" hidden></label>
+      <button class="btn" id="new">New</button>
+      <button class="btn primary" id="download">Download CSV</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="editor">
+      <div id="warnings" class="notice" hidden></div>
+
+      <div class="card mod">
+        <label class="field wide">
+          <span>Mod name</span>
+          <input id="displayName" type="text" placeholder="Plugin name">
+        </label>
+      </div>
+
+      <div id="settings"></div>
+
+      <div class="row-actions">
+        <button class="btn primary" id="add">+ Add setting</button>
+        <button class="btn" id="renumber" title="Order = 10, 20, 30…">Auto order</button>
+      </div>
+    </section>
+
+    <aside class="preview">
+      <div class="preview-head">
+        <span>ST_ModSettings.csv preview</span>
+        <span id="status" class="status"></span>
+      </div>
+      <pre id="csv"></pre>
+    </aside>
+  </main>
+
+  <div id="drop" class="drop" hidden>Drop CSV</div>
+
+  <script src="csvmodel.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
