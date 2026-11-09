@@ -30,6 +30,8 @@ one real setting, `Speed`, which changes the speed of the facility trams.
 
 ## Step 1. Describe your settings
 
+!!!  **You can use [setting generator page](qertyy777.github.io) to generate csv import file**
+
 Create a String Table `ModSettings/ST_ModSettings` in your mod (Content Browser → Miscellaneous → String Table) and
 fill it with **Import from CSV** (header `Key,SourceString`). Example:
 
