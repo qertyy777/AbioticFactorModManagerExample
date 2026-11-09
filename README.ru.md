@@ -31,6 +31,8 @@ ConfigurationManager — **необязательная** зависимость
 
 ## Шаг 1. Описание настроек
 
+**CSV можно собрать на [странице-генераторе настроек](https://qertyy777.github.io/AbioticFactorModManagerExample/)**
+
 Создайте String Table `ModSettings/ST_ModSettings` в своём моде (Content Browser → Miscellaneous → String Table)
 и заполните её через **Import from CSV** (заголовок `Key,SourceString`). Пример:
 
