@@ -9,7 +9,7 @@
   var model = loadDraft() || starterModel();
 
   function starterModel() {
-    return { displayName: "", settings: [newSetting(1)], extra: [], warnings: [] };
+    return { displayName: "", description: "", settings: [newSetting(1)], extra: [], warnings: [] };
   }
 
   function newSetting(n) {
@@ -19,7 +19,10 @@
   function loadDraft() {
     try {
       var saved = JSON.parse(localStorage.getItem(DRAFT_KEY));
-      return saved && Array.isArray(saved.settings) ? Object.assign({ extra: [] }, saved, { warnings: [] }) : null;
+      if (!saved || !Array.isArray(saved.settings)) return null;
+      // Drafts saved before format 2 have no description or categories.
+      saved.settings = saved.settings.map(function (s) { return Object.assign(M.emptySetting(), s); });
+      return Object.assign({ extra: [], description: "" }, saved, { warnings: [] });
     } catch (e) {
       return null;
     }
@@ -67,6 +70,28 @@
     return node;
   }
 
+  function categoryInput(value) {
+    var node = input(value, "none");
+    node.setAttribute("list", "categories");
+    return node;
+  }
+
+  function renderPanelOrder() {
+    var list = $("panel-order");
+    list.textContent = "";
+    M.panelOrder(model).forEach(function (r) {
+      if (r.header !== undefined) {
+        list.appendChild(el("li", { className: "header", text: r.header }));
+      } else {
+        var s = model.settings[r.setting];
+        list.appendChild(el("li", { text: s.label || s.key }));
+      }
+    });
+    var options = $("categories");
+    options.textContent = "";
+    M.categories(model).forEach(function (c) { options.appendChild(el("option", { value: c })); });
+  }
+
   function defaultControl(s) {
     if (s.type === "Bool") return select(["true", "false"], s.default);
     if (s.type === "Choice") {
@@ -103,6 +128,7 @@
           field(i, "order", "Order", input(s.order)),
           field(i, "applyOn", "Apply on", select([["", "—"], "Live", "WorldReload"], s.applyOn)),
           field(i, "description", "Description", input(s.description)),
+          field(i, "category", "Category", categoryInput(s.category)),
         ]),
       ]);
       list.appendChild(card);
@@ -112,6 +138,7 @@
 
   function renderAll() {
     $("displayName").value = model.displayName;
+    $("description").value = model.description || "";
     var warnings = $("warnings");
     warnings.hidden = !model.warnings.length;
     warnings.textContent = "";
@@ -140,6 +167,7 @@
     status.textContent = count ? count + " with errors" : "OK";
     status.className = "status " + (count ? "warn" : "ok");
     $("csv").textContent = M.toCsvText(model);
+    renderPanelOrder();
     saveDraft();
   }
 
@@ -185,6 +213,7 @@
   }
 
   $("displayName").addEventListener("input", function (e) { model.displayName = e.target.value; refresh(); });
+  $("description").addEventListener("input", function (e) { model.description = e.target.value; refresh(); });
 
   $("add").addEventListener("click", function () {
     model.settings.push(newSetting(model.settings.length + 1));

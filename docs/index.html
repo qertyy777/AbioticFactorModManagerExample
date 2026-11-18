@@ -29,7 +29,12 @@
           <span>Mod name</span>
           <input id="displayName" type="text" placeholder="Plugin name">
         </label>
+        <label class="field wide">
+          <span>Mod description <em>— shown by the ? button in the panel; \n is a line break</em></span>
+          <textarea id="description" rows="3" placeholder="What the mod does and how to use its settings"></textarea>
+        </label>
       </div>
+      <datalist id="categories"></datalist>
 
       <div id="settings"></div>
 
@@ -45,6 +50,8 @@
         <span id="status" class="status"></span>
       </div>
       <pre id="csv"></pre>
+      <div class="preview-head"><span>In the panel</span></div>
+      <ol id="panel-order" class="panel-order"></ol>
     </aside>
   </main>
 

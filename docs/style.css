@@ -107,7 +107,7 @@ h1 { margin: 0; font-size: 20px; }
 .field > span { font-weight: 600; font-size: 13px; }
 .field em { font-style: normal; font-weight: 400; color: var(--muted); }
 .f-description, .f-choices, .field.wide { grid-column: 1 / -1; }
-input, select {
+input, select, textarea {
   width: 100%;
   padding: 6px 8px;
   border: 1px solid var(--line);
@@ -116,7 +116,8 @@ input, select {
   color: var(--text);
   font: inherit;
 }
-input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+textarea { resize: vertical; }
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 .err { color: var(--danger); min-height: 0; }
 .err:empty { display: none; }
 
@@ -139,12 +140,24 @@ pre {
   background: var(--code-bg);
   border: 1px solid var(--line);
   border-radius: 8px;
-  max-height: calc(100vh - 140px);
+  max-height: calc(60vh - 80px);
   overflow: auto;
   font-size: 12.5px;
   white-space: pre;
 }
-@media (max-width: 900px) { .preview { position: static; } pre { max-height: 50vh; } }
+.panel-order {
+  margin: 0;
+  padding: 8px 12px 8px 32px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  max-height: calc(40vh - 60px);
+  overflow: auto;
+  font-size: 13px;
+}
+.preview .preview-head + .panel-order { margin-top: 0; }
+.preview pre + .preview-head { margin-top: 12px; }
+.panel-order .header { list-style: none; margin: 6px 0 2px -20px; font-weight: 600; }
+@media (max-width: 900px) { .preview { position: static; } pre, .panel-order { max-height: 50vh; } }
 
 .drop {
   position: fixed;

@@ -9,8 +9,9 @@
   var FIELDS = [
     ["Type", "type"], ["Default", "default"], ["Min", "min"], ["Max", "max"], ["Step", "step"],
     ["Choices", "choices"], ["Label", "label"], ["Description", "description"], ["Order", "order"],
-    ["ApplyOn", "applyOn"],
+    ["ApplyOn", "applyOn"], ["Category", "category"],
   ];
+  var V2_ONLY = { category: true };
   var NUMERIC_ONLY = { min: true, max: true, step: true };
   var KEY_RE = /^[A-Za-z0-9_]+$/;
   var INT_RE = /^-?\d+$/;
@@ -19,7 +20,7 @@
   function emptySetting() {
     return {
       key: "", type: "Float", default: "", min: "", max: "", step: "", choices: "",
-      label: "", description: "", order: "", applyOn: "",
+      label: "", description: "", order: "", applyOn: "", category: "",
     };
   }
 
@@ -63,12 +64,21 @@
 
   function fromCsv(text) {
     var rows = parseCsv(text);
-    var model = { displayName: "", settings: [], extra: [], warnings: [] };
+    var model = { displayName: "", description: "", settings: [], extra: [], warnings: [] };
     if (rows.length && rows[0][0] === "Key") {
       rows = rows.slice(1);
     } else {
       model.warnings.push("No Key,SourceString header; reading all rows as settings.");
     }
+    // The version decides how the other rows are read, wherever its row is.
+    var version = "1";
+    rows.forEach(function (r) {
+      if (r[0] === "Mod.FormatVersion") version = r.length > 1 ? r[1] : "";
+    });
+    if (version !== "1" && version !== "2") {
+      model.warnings.push("Mod.FormatVersion is " + version + "; it will be saved as 1 or 2.");
+    }
+    var v2 = version === "2";
     var byKey = {};
     var fieldOf = {};
     FIELDS.forEach(function (f) { fieldOf[f[0]] = f[1]; });
@@ -80,10 +90,17 @@
       var field = dot < 0 ? "" : fullKey.slice(dot + 1);
       if (key === "Mod") {
         if (field === "DisplayName") { model.displayName = value; return; }
-        if (field === "FormatVersion") {
-          if (value !== "1") model.warnings.push("Mod.FormatVersion is " + value + "; it will be saved as 1.");
+        if (field === "FormatVersion") return;
+        if (field === "Description") {
+          if (v2) { model.description = value; return; }
+          model.extra.push([fullKey, value]);
+          model.warnings.push(fullKey + " is ignored in format 1; kept as is.");
           return;
         }
+      } else if (key && fieldOf[field] && V2_ONLY[fieldOf[field]] && !v2) {
+        model.extra.push([fullKey, value]);
+        model.warnings.push(fullKey + " is ignored in format 1; kept as is.");
+        return;
       } else if (key && fieldOf[field]) {
         if (!byKey[key]) {
           byKey[key] = emptySetting();
@@ -99,21 +116,64 @@
     return model;
   }
 
+  function blank(value) {
+    return value == null || String(value).trim() === "";
+  }
+
+  // "2" only when a format 2 field is used, so a table without them still loads in older managers.
+  function formatVersion(model) {
+    if (!blank(model.description)) return "2";
+    return model.settings.some(function (s) { return !blank(s.category); }) ? "2" : "1";
+  }
+
   function toCsvText(model) {
-    var rows = [["Key", "SourceString"], ["Mod.FormatVersion", "1"]];
+    var version = formatVersion(model);
+    var rows = [["Key", "SourceString"], ["Mod.FormatVersion", version]];
     if (model.displayName) rows.push(["Mod.DisplayName", model.displayName]);
+    if (version === "2" && !blank(model.description)) rows.push(["Mod.Description", model.description]);
     model.settings.forEach(function (s) {
       var numeric = s.type === "Int" || s.type === "Float";
       FIELDS.forEach(function (f) {
         var prop = f[1];
         if (NUMERIC_ONLY[prop] && !numeric) return;
         if (prop === "choices" && s.type !== "Choice") return;
+        if (V2_ONLY[prop] && blank(s[prop])) return;
         if (s[prop] === "" || s[prop] == null) return;
         rows.push([s.key + "." + f[0], s[prop]]);
       });
     });
     (model.extra || []).forEach(function (r) { rows.push([r[0], r[1]]); });
     return toCsv(rows);
+  }
+
+  // Non-empty categories, trimmed, once each, in list order.
+  function categories(model) {
+    var out = [];
+    model.settings.forEach(function (s) {
+      var c = (s.category || "").trim();
+      if (c && out.indexOf(c) < 0) out.push(c);
+    });
+    return out;
+  }
+
+  // Rows as the panel shows them: [{header}] or [{setting: index}]. Settings sort by Order (StringToInt in the
+  // manager: a bad value is 0, ties keep list order); uncategorized first, then each category at its first setting.
+  function panelOrder(model) {
+    var sorted = model.settings.map(function (s, i) { return i; }).sort(function (a, b) {
+      return (parseInt(model.settings[a].order, 10) || 0) - (parseInt(model.settings[b].order, 10) || 0);
+    });
+    var cat = function (i) { return (model.settings[i].category || "").trim(); };
+    var rows = [];
+    sorted.forEach(function (i) { if (!cat(i)) rows.push({ setting: i }); });
+    var done = [];
+    sorted.forEach(function (i) {
+      var c = cat(i);
+      if (!c || done.indexOf(c) >= 0) return;
+      done.push(c);
+      rows.push({ header: c });
+      sorted.forEach(function (j) { if (cat(j) === c) rows.push({ setting: j }); });
+    });
+    return rows;
   }
 
   function choiceList(s) {
@@ -187,7 +247,8 @@
 
   var api = {
     TYPES: TYPES, APPLY_ON: APPLY_ON, emptySetting: emptySetting, parseCsv: parseCsv, toCsv: toCsv,
-    fromCsv: fromCsv, toCsvText: toCsvText, validateModel: validateModel, choiceList: choiceList,
+    fromCsv: fromCsv, toCsvText: toCsvText, formatVersion: formatVersion, validateModel: validateModel,
+    choiceList: choiceList, categories: categories, panelOrder: panelOrder,
     changeType: changeType,
   };
   if (typeof module !== "undefined" && module.exports) module.exports = api;

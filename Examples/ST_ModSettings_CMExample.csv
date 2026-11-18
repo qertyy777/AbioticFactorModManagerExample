@@ -1,6 +1,7 @@
 Key,SourceString
-Mod.FormatVersion,1
+Mod.FormatVersion,2
 Mod.DisplayName,CM Example
+Mod.Description,"Example mod for the Configuration Manager.\nTram speed changes how fast the facility trams move, with or without passengers; it applies right after Apply.\nThe settings under Setting types do nothing: they show the Bool, Int and Choice types."
 Speed.Type,Float
 Speed.Default,1.0
 Speed.Min,0.5
@@ -10,21 +11,26 @@ Speed.Label,Tram speed
 Speed.Description,"Speed multiplier for trams in this world. 1.0 is the normal game speed."
 Speed.Order,10
 Speed.ApplyOn,Live
+Speed.Category,Trams
 TBool.Type,Bool
 TBool.Default,true
-TBool.Label,Test bool
-TBool.Description,A checkbox.
+TBool.Label,Example checkbox
+TBool.Description,A Bool setting.
 TBool.Order,20
+TBool.Category,Setting types
 TInt.Type,Int
 TInt.Default,2
 TInt.Min,0
 TInt.Max,5
-TInt.Label,Test int
+TInt.Label,Example whole number
+TInt.Description,An Int setting from 0 to 5.
 TInt.Order,30
+TInt.Category,Setting types
 TChoice.Type,Choice
 TChoice.Default,1
 TChoice.Choices,Low;Medium;High
-TChoice.Label,Test choice
-TChoice.Description,Takes effect after the world is reloaded.
+TChoice.Label,Example choice
+TChoice.Description,A Choice setting. Takes effect after the world is reloaded.
 TChoice.Order,40
 TChoice.ApplyOn,WorldReload
+TChoice.Category,Setting types
