@@ -12,7 +12,9 @@ and hooks are not called. So a mod keeps working without the manager only if it 
 places or uses) that read the values; a mod whose code runs only in hooks does nothing.
 
 A complete working example is the `CMExampleModAbr9y` mod in this repository (`Examples/CMExampleModAbr9y`). It has
-one real setting, `Speed`, which changes the speed of the facility trams.
+one real setting, `Speed`, which changes the speed of the facility trams, and three demo settings (`TBool`, `TInt`,
+`TChoice`) that only show the other types. Its table (`Examples/ST_ModSettings_CMExample.csv`) uses format 2: a
+summary, a briefing and two categories with descriptions.
 
 ![ModSettings folder of the example mod](images/01-modsettings-folder.png)
 
@@ -53,7 +55,7 @@ Speed.Order,10
 
 | Key | Value | Required |
 |---|---|---|
-| `Mod.FormatVersion` | `1` | yes |
+| `Mod.FormatVersion` | `1`, or `2` for the format 2 fields (see below) | yes |
 | `Mod.DisplayName` | mod name shown in the panel | no (defaults to the plugin name) |
 | `<Key>.Type` | `Bool` / `Int` / `Float` / `Choice` | yes |
 | `<Key>.Default` | Bool: `true`/`false` (or `1`/`0`); Int/Float: a number; Choice: option index from `0` | yes |
@@ -64,16 +66,48 @@ Speed.Order,10
 | `<Key>.Choices` | options separated by `;`, e.g. `Low;Medium;High` | for Choice |
 | `<Key>.Order` | position in the panel (ascending) | no |
 | `<Key>.ApplyOn` | `Live` (default) or `WorldReload` | no |
+| `Mod.Description` | mod briefing, shown by the **?** button (format 2 only) | no |
+| `<Key>.Category` | category header the setting is listed under (format 2 only) | no |
+| `Mod.Summary` | one short line under the mod name (format 2 only) | no |
+| `Category.<category>.Description` | short line under a category header (format 2 only) | no |
 
 Rules:
 - `<Key>` uses Latin letters, digits and `_` only.
 - A broken setting (unknown type, missing `Label`, `Min > Max`, a `Choice` without options and so on) is skipped
   silently; the other settings work.
-- If `Mod.FormatVersion` is not `1`, the whole table is skipped, and a mod without valid settings gets no button in
-  the panel.
+- If `Mod.FormatVersion` is not `1` or `2`, the whole table is skipped, and a mod without valid settings gets no
+  button in the panel.
 - Values entered in the panel are clamped to `Min`/`Max` and snapped to `Step`.
 - `ApplyOn = WorldReload` currently only adds the note "takes effect after the world is reloaded" in the panel. The
   manager does not delay the value: readers and the hook see the new value right after Apply.
+
+### Format 2: categories, summary and briefing
+
+Set `Mod.FormatVersion` to `2` to use these optional fields. Everything from format 1 stays the same.
+
+```csv
+Mod.FormatVersion,2
+Mod.Summary,Faster facility trams.
+Mod.Description,"Trams move faster.\nThe speed applies right after Apply."
+Category.Trams.Description,How the facility trams move.
+Speed.Category,Trams
+```
+
+- **Summary.** `Mod.Summary` is one short line shown under your mod's name in the panel.
+- **Briefing.** With `Mod.Description` the panel shows a **?** button next to your mod's name; it opens a window with
+  the text. `\n` starts a new line. Without a description (or with only spaces) there is no button.
+- **Categories.** Settings with the same `Category` are listed under one header. Settings without a category come
+  first, without a header. Categories are ordered by the smallest `Order` of their settings; inside a category the
+  settings follow `Order`. If no setting has a category, the list looks exactly as in format 1.
+- **Collapsing.** A category header is a button: all categories are collapsed when the panel opens, and a click
+  expands or collapses one. The panel remembers this while it stays open.
+- **Category description.** `Category.<category>.Description` is a short line under the header (shown even when the
+  category is collapsed). `<category>` is written exactly as in `<Key>.Category`, spaces included.
+- Empty (or spaces-only) summaries and descriptions are not shown. `Mod` and `Category` can't be setting keys.
+- In a format 1 table these fields are ignored.
+- A manager released before format 2 skips a format 2 table entirely, so your mod shows no settings there. Players
+  get the new manager from mod.io automatically; a dedicated server that installs mods by hand (`-SideloadMods`)
+  needs the manager updated too. If you don't need these fields, stay on format 1.
 
 ## Step 2. Copy the reader
 
@@ -165,7 +199,8 @@ panel:
 - your mod has a button with the number of valid settings next to it;
 - every setting you described is in the list; a missing setting was skipped because of an error in its keys;
 - no button means the table was not found or has no valid settings (`Mod.FormatVersion`, path
-  `ModSettings/ST_ModSettings`).
+  `ModSettings/ST_ModSettings`);
+- format 2: headers appear for your categories, and the **?** button opens your description.
 
 To check the reader or a hook, write the value to the chat while testing (`Get Game Mode → Cast To
 Abiotic_Survival_GameMode → Send Text Chat Message To All Players`, works on the server; `Print String` is not shown
