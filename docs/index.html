@@ -30,11 +30,19 @@
           <input id="displayName" type="text" placeholder="Plugin name">
         </label>
         <label class="field wide">
-          <span>Mod description <em>— shown by the ? button in the panel; \n is a line break</em></span>
+          <span>Summary <em>— one short line under the mod name</em></span>
+          <input id="summary" type="text" placeholder="What the mod does, in a few words">
+        </label>
+        <label class="field wide">
+          <span>Briefing <em>— shown by the ? button in the panel; \n is a line break</em></span>
           <textarea id="description" rows="3" placeholder="What the mod does and how to use its settings"></textarea>
         </label>
       </div>
       <datalist id="categories"></datalist>
+      <div class="card mod" id="categories-card" hidden>
+        <div class="field wide"><span>Categories <em>— a description is shown under the category header</em></span></div>
+        <div id="categories-list" class="grid"></div>
+      </div>
 
       <div id="settings"></div>
 

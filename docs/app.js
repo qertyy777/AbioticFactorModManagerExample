@@ -9,7 +9,7 @@
   var model = loadDraft() || starterModel();
 
   function starterModel() {
-    return { displayName: "", description: "", settings: [newSetting(1)], extra: [], warnings: [] };
+    return { displayName: "", summary: "", description: "", categoryDescriptions: {}, settings: [newSetting(1)], extra: [], warnings: [] };
   }
 
   function newSetting(n) {
@@ -22,7 +22,7 @@
       if (!saved || !Array.isArray(saved.settings)) return null;
       // Drafts saved before format 2 have no description or categories.
       saved.settings = saved.settings.map(function (s) { return Object.assign(M.emptySetting(), s); });
-      return Object.assign({ extra: [], description: "" }, saved, { warnings: [] });
+      return Object.assign({ extra: [], description: "", summary: "", categoryDescriptions: {} }, saved, { warnings: [] });
     } catch (e) {
       return null;
     }
@@ -90,6 +90,28 @@
     var options = $("categories");
     options.textContent = "";
     M.categories(model).forEach(function (c) { options.appendChild(el("option", { value: c })); });
+    renderCategoryDescriptions();
+  }
+
+  // One description field per category; rebuilt only when the list of categories changes, so typing keeps focus.
+  var shownCategories = null;
+  function renderCategoryDescriptions() {
+    var names = M.categories(model);
+    if (shownCategories === names.join("\n")) return;
+    shownCategories = names.join("\n");
+    $("categories-card").hidden = !names.length;
+    var list = $("categories-list");
+    list.textContent = "";
+    names.forEach(function (n) {
+      var control = input((model.categoryDescriptions || {})[n] || "", "No description");
+      control.dataset.category = n;
+      control.addEventListener("input", function () {
+        model.categoryDescriptions = model.categoryDescriptions || {};
+        model.categoryDescriptions[n] = control.value;
+        refresh();
+      });
+      list.appendChild(el("label", { className: "field" }, [el("span", { text: n }), control]));
+    });
   }
 
   function defaultControl(s) {
@@ -139,6 +161,8 @@
   function renderAll() {
     $("displayName").value = model.displayName;
     $("description").value = model.description || "";
+    $("summary").value = model.summary || "";
+    shownCategories = null;
     var warnings = $("warnings");
     warnings.hidden = !model.warnings.length;
     warnings.textContent = "";
@@ -214,6 +238,7 @@
 
   $("displayName").addEventListener("input", function (e) { model.displayName = e.target.value; refresh(); });
   $("description").addEventListener("input", function (e) { model.description = e.target.value; refresh(); });
+  $("summary").addEventListener("input", function (e) { model.summary = e.target.value; refresh(); });
 
   $("add").addEventListener("click", function () {
     model.settings.push(newSetting(model.settings.length + 1));

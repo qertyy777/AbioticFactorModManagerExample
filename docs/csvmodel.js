@@ -64,7 +64,7 @@
 
   function fromCsv(text) {
     var rows = parseCsv(text);
-    var model = { displayName: "", description: "", settings: [], extra: [], warnings: [] };
+    var model = { displayName: "", summary: "", description: "", categoryDescriptions: {}, settings: [], extra: [], warnings: [] };
     if (rows.length && rows[0][0] === "Key") {
       rows = rows.slice(1);
     } else {
@@ -88,15 +88,22 @@
       var dot = fullKey.indexOf(".");
       var key = dot < 0 ? "" : fullKey.slice(0, dot);
       var field = dot < 0 ? "" : fullKey.slice(dot + 1);
+      var ignoredInV1 = function () {
+        model.extra.push([fullKey, value]);
+        model.warnings.push(fullKey + " is ignored in format 1; kept as is.");
+      };
       if (key === "Mod") {
         if (field === "DisplayName") { model.displayName = value; return; }
         if (field === "FormatVersion") return;
-        if (field === "Description") {
-          if (v2) { model.description = value; return; }
-          model.extra.push([fullKey, value]);
-          model.warnings.push(fullKey + " is ignored in format 1; kept as is.");
+        if (field === "Description" || field === "Summary") {
+          if (!v2) { ignoredInV1(); return; }
+          model[field === "Summary" ? "summary" : "description"] = value;
           return;
         }
+      } else if (key === "Category" && /\.Description$/.test(field) && field.length > ".Description".length) {
+        if (!v2) { ignoredInV1(); return; }
+        model.categoryDescriptions[field.slice(0, -".Description".length)] = value;
+        return;
       } else if (key && fieldOf[field] && V2_ONLY[fieldOf[field]] && !v2) {
         model.extra.push([fullKey, value]);
         model.warnings.push(fullKey + " is ignored in format 1; kept as is.");
@@ -122,15 +129,27 @@
 
   // "2" only when a format 2 field is used, so a table without them still loads in older managers.
   function formatVersion(model) {
-    if (!blank(model.description)) return "2";
+    if (!blank(model.description) || !blank(model.summary)) return "2";
+    if (describedCategories(model).length) return "2";
     return model.settings.some(function (s) { return !blank(s.category); }) ? "2" : "1";
+  }
+
+  // Categories with a non-blank description: the ones settings use first (in list order), then the rest.
+  function describedCategories(model) {
+    var descs = model.categoryDescriptions || {};
+    var names = categories(model).concat(Object.keys(descs));
+    return names.filter(function (n, i) { return names.indexOf(n) === i && !blank(descs[n]); });
   }
 
   function toCsvText(model) {
     var version = formatVersion(model);
     var rows = [["Key", "SourceString"], ["Mod.FormatVersion", version]];
     if (model.displayName) rows.push(["Mod.DisplayName", model.displayName]);
-    if (version === "2" && !blank(model.description)) rows.push(["Mod.Description", model.description]);
+    if (!blank(model.summary)) rows.push(["Mod.Summary", model.summary]);
+    if (!blank(model.description)) rows.push(["Mod.Description", model.description]);
+    describedCategories(model).forEach(function (n) {
+      rows.push(["Category." + n + ".Description", model.categoryDescriptions[n]]);
+    });
     model.settings.forEach(function (s) {
       var numeric = s.type === "Int" || s.type === "Float";
       FIELDS.forEach(function (f) {
@@ -184,6 +203,7 @@
     if (!s.key) add("key", "Key is required.");
     else if (!KEY_RE.test(s.key)) add("key", "Key may use Latin letters, digits and _ only.");
     else if (s.key === "Mod") add("key", "Key Mod is reserved for the Mod.* rows.");
+    else if (s.key === "Category") add("key", "Key Category is reserved for the Category.* rows.");
 
     if (TYPES.indexOf(s.type) < 0) {
       add("type", "Type must be Bool, Int, Float or Choice.");
